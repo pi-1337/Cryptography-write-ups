@@ -1,4 +1,4 @@
-# RSA Challenge Writeup — Exploiting `m^(p+q)` Leak
+# RSA Challenge Writeup — Exploiting \( m^{p+q} \) Leak
 
 > *A fun RSA challenge where factoring is impossible but math saves the day.*
 
@@ -9,11 +9,11 @@
 We are given:
 
 - Public key: \((e, N)\)
-- Ciphertext:  
+- Ciphertext:
   \[
   \text{ct}_1 = m^e \bmod N
   \]
-- A **mysterious leak**:  
+- A **mysterious leak**:
   \[
   \text{ct}_2 = m^{p+q} \bmod N
   \]
@@ -35,7 +35,11 @@ Normally, an RSA solve path is:
 4. Compute \(m = \text{ct}_1^d \bmod N\)
 
 But here, factoring is off the table.  
-Instead, we’re given \(\text{ct}_2 = m^{p+q} \bmod N\), which is **unusual**.
+Instead, we’re given:
+\[
+\text{ct}_2 = m^{p+q} \bmod N
+\]
+which is **unusual**.
 
 ---
 
@@ -50,18 +54,18 @@ Replacing \(pq\) with \(N\):
 \varphi(N) = N + 1 - (p+q)
 \]
 
-And Euler's theorem says:
+Euler's theorem says:
 \[
 a^{\varphi(N)} \equiv 1 \pmod N
 \]
 
-Special case: If \(N\) is prime, \(\varphi(N) = N - 1\) and we get Fermat's Little Theorem.
+Special case: if \(N\) is prime, \(\varphi(N) = N - 1\) (Fermat's Little Theorem).
 
 From Euler’s theorem:
 \[
-a^{\varphi(N)+1} \equiv a \pmod N
+a^{\varphi(N) + 1} \equiv a \pmod N
 \]
-So, **if we could raise \(m\) to \(\varphi(N) + 1\), we’d get \(m\) back**.
+So, **if we could raise \(m\) to \(\varphi(N) + 1\)**, we’d get \(m\) back.
 
 ---
 
@@ -76,7 +80,8 @@ And:
 \varphi(N) = N + 1 - (p+q)
 \]
 
-If we somehow got \(m^{N+1} \bmod N\), we could multiply it by \(m^{-(p+q)}\) (the inverse of \(\text{ct}_2\)) to get:
+If we somehow got \(m^{N+1} \bmod N\),  
+we could multiply it by \(m^{-(p+q)}\) (the inverse of \(\text{ct}_2\)) to get:
 \[
 m^{\varphi(N) + 1} \equiv m \pmod N
 \]
@@ -91,10 +96,12 @@ Let:
 \[
 N = \alpha e + \beta, \quad \beta < e
 \]
+
 Define:
 \[
 \gamma = e - \beta - 1
 \]
+
 Then:
 \[
 e = \gamma + \beta + 1
@@ -109,15 +116,22 @@ Multiply by \(\text{ct}_2^{-1}\):
 \[
 m_{\gamma} = m^{e(\alpha+1) - (p+q)}
 \]
-Substituting \(e = \gamma + \beta + 1\) and \(N = \alpha e + \beta\), we get:
+
+Substitute \(e = \gamma + \beta + 1\) and \(N = \alpha e + \beta\):
 \[
 m_{\gamma} = m^{\varphi(N) + \gamma} \equiv m^\gamma \pmod N
 \]
 (Because \(m^{\varphi(N)} \equiv 1 \pmod N\))
 
+---
+
 Now we have:
-- \(\text{ct}_1 = m^e \bmod N\)
-- \(m_{\gamma} = m^\gamma \bmod N\)
+\[
+\text{ct}_1 = m^e \bmod N
+\]
+\[
+m_{\gamma} = m^\gamma \bmod N
+\]
 
 ---
 
@@ -127,7 +141,11 @@ Bézout's Lemma says:
 \[
 \exists \ x, y \ \text{s.t.} \ e x + \gamma y = \gcd(e, \gamma)
 \]
-Since \(e\) is prime and \(\gamma < e\), \(\gcd(e,\gamma) = 1\).
+
+Since \(e\) is prime and \(\gamma < e\), we have:
+\[
+\gcd(e, \gamma) = 1
+\]
 
 Thus:
 \[
