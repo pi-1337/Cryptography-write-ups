@@ -1,194 +1,63 @@
-# 🔓 RSA Challenge Writeup — Exploiting \( m^{p+q} \) Leak
+RSA Challenge Write-Up
+Challenge Description
 
-> A fun RSA challenge where factoring is impossible… but math saves the day. 🧠⚡
+We are given an RSA challenge where the public key (e, N) and the ciphertext of the flag ct1 are provided. The primes p and q are super large, so factoring N directly isn't feasible. However, we're also given an additional interesting value: ct2 = m^(p+q) mod N.
+Approach
+Understanding the Problem
 
----
+In standard RSA challenges, the goal is to factor the modulus N and then decrypt the message. However, in this challenge, the solution involves leveraging the additional information ct2 = m^(p+q) mod N to recover the message directly.
+Key Observations
 
-## 📜 Challenge Summary
+    Euler's Totient Function φ(N):
 
-We are given:
+        For RSA, N = p * q, so:
+        text
 
-- **Public key:** \((e, N)\)  
-- **Ciphertext:**  
-  \[
-  \text{ct}_1 = m^e \bmod N
-  \]  
-- **A mysterious leak:**  
-  \[
-  \text{ct}_2 = m^{p+q} \bmod N
-  \]
+φ(N) = (p-1)*(q-1) = p*q + 1 - (p+q) = N + 1 - (p+q)
 
-Here:
+Euler's theorem tells us that for any integer a coprime with N:
+text
 
-- \(p\) and \(q\) are huge primes — factoring \(N\) is not feasible.
-- **Goal:** Recover \(m\) (the flag) without factoring.
+a^φ(N) ≡ 1 mod N
 
----
+This implies:
+text
 
-## 🧠 Initial Thoughts
+    a^(φ(N) + 1) ≡ a mod N
 
-The *usual* RSA solve path:
+Leaking m^(p+q) mod N:
 
-1. Factor \( N = p \cdot q \)  
-2. Compute \(\varphi(N) = (p-1)(q-1)\)  
-3. Find \(d = e^{-1} \bmod \varphi(N)\)  
-4. Compute \( m = \text{ct}_1^d \bmod N \)  
+    Given ct2 = m^(p+q) mod N, we can use it to recover φ(N):
+    text
 
-But here, **factoring is off the table**.
+        φ(N) = N + 1 - (p+q)
 
-Instead, we’re given:
-\[
-\text{ct}_2 = m^{p+q} \bmod N
-\]
-which is unusual — it’s basically a power related to \(p+q\).
+        Thus, if we can compute m^(φ(N) + 1) mod N, we can recover m.
 
----
+Mathematical Manipulation
 
-## 📐 Key Insight
+    Expressing φ(N) + 1:
 
-We know:
-\[
-\varphi(N) = (p-1)(q-1) = pq - p - q + 1
-\]  
-Replacing \(pq\) with \(N\):
-\[
-\varphi(N) = N + 1 - (p+q)
-\]
+        From φ(N) = N + 1 - (p+q), we have:
+        text
 
-From **Euler's theorem**:
-\[
-a^{\varphi(N)} \equiv 1 \pmod N
-\]
-and thus:
-\[
-a^{\varphi(N) + 1} \equiv a \pmod N
-\]
+    φ(N) + 1 = N + 2 - (p+q)
 
-So if we could compute \(m^{\varphi(N) + 1}\), we’d directly get \(m\).
+    However, directly computing m^(N+1) mod N is not straightforward since we don't know m.
 
----
+Alternative Approach:
 
-## 🔍 Relating to the Leak
+    We have ct1 = m^e mod N and ct2 = m^(p+q) mod N.
 
-We have:
-\[
-\text{ct}_1 = m^e \bmod N
-\]
-\[
-\text{ct}_2 = m^{p+q} \bmod N
-\]
-and:
-\[
-\varphi(N) = N + 1 - (p+q)
-\]
+    Let’s express N in terms of e:
+    text
 
-If we somehow had \(m^{N+1} \bmod N\),  
-we could multiply by \(m^{-(p+q)}\) (inverse of \(\text{ct}_2\)) to get:
-\[
-m^{\varphi(N) + 1} \equiv m \pmod N
-\]
+    N = α * e + β, where β = N % e
 
-Problem: We don’t have \(m^{N+1}\) directly.
+    Define γ = e - β - 1.
 
----
+    Then, e = γ + β + 1.
 
-## ⚡ Trick — Approximating \(m^{N+1}\)
+Computing m^γ mod N:
 
-Let:
-\[
-N = \alpha e + \beta, \quad \beta < e
-\]
-
-Define:
-\[
-\gamma = e - \beta - 1
-\]
-
-Then:
-\[
-e = \gamma + \beta + 1
-\]
-
-Raise \(\text{ct}_1\) to \(\alpha + 1\):
-\[
-\text{ct}_1^{\alpha+1} = m^{e(\alpha+1)}
-\]
-
-Multiply by \(\text{ct}_2^{-1}\):
-\[
-m_{\gamma} = m^{e(\alpha+1) - (p+q)}
-\]
-
-Substitute \(e = \gamma + \beta + 1\) and \(N = \alpha e + \beta\):
-\[
-m_{\gamma} = m^{\varphi(N) + \gamma} \equiv m^\gamma \pmod N
-\]
-(because \(m^{\varphi(N)} \equiv 1 \pmod N\))
-
----
-
-Now we have:
-\[
-\text{ct}_1 = m^e \bmod N
-\]
-\[
-m_{\gamma} = m^\gamma \bmod N
-\]
-
----
-
-## 📏 Recovering \(m\) — Bézout's Lemma
-
-Bézout’s Lemma:
-\[
-\exists \ x, y \ \text{s.t.} \ e x + \gamma y = \gcd(e, \gamma)
-\]
-
-Since \(e\) is prime and \(\gamma < e\):
-\[
-\gcd(e, \gamma) = 1
-\]
-
-Thus:
-\[
-m = \left( \text{ct}_1^x \cdot m_{\gamma}^y \right) \bmod N
-\]
-because:
-\[
-\left(\text{ct}_1^x \cdot m_{\gamma}^y\right) \bmod N
-= m^{ex + \gamma y} \bmod N
-= m^1 \bmod N
-\]
-
----
-
-## 💻 Exploit Code
-
-```python
-from Crypto.Util.number import *
-
-e = 65537
-N = 13172635138210286640933237746072073728198869440440273861514688422430115450596963502627269613634657978751692320585777768877613321668778514462972611542147278205792418292362109100597755668571861738781190210255903465162483813897653948305531342676537057130369323555420200545974179860718822410192595079238246216026529376260568656408216009127973127738250617629330070723654601189310430802429585919291621479622419163092371272056180409609142738265178224163465585013019636286435078812898907472859171136422659050412212315590509027225331104292443193693974638004592849794819591007103879538185323581422819852185166422985403024630123
-ct1 = 8499526321488266762028127474977263983474334713646962923180757984708039537289636737028409522654349845032612940144246996001396064450188534247830979105036627472087587636695469693411422088223080856169980341928057477564688506588678465277896123712776169270866525885072607021419929184184301722442524104467963680432737243478200661224741027413690099507128782156810842444314483076587935222998920241102484844741597333281611874849648935849985954902264102662618041817365284648356127737145896858259709819593359264714426125676691235985164360773645489923563993927995838346085066937602961724919392025887999986486672200850129835569774
-ct2 = 2263178005282615069738169250508811825030372342139636879043114251227029802177975391784856426659871916802959302578620910469427367218786299839311310420522660987052055310279591316813828952756984548230575321772825193775083404279028090110850848262192595930920326368607665856808251531130234210906413358662814500632504899088517752958423466186872534450108628371006268110210630017230741670440780982809417986017372337888735465439382827207990030719121834402226087906249993820193417658352914727984318783025375497623944699995700474418221251293446038111913247755996471673024017921092527032486774115935601292346440934530921157935322
-
-alpha = N // e
-beta = N % e
-gamma = e - beta - 1
-
-# m^gamma
-m_to_gamma = (pow(ct1, alpha + 1, N) * pow(ct2, -1, N)) % N
-
-# Extended GCD
-def extended_gcd(a, b):
-    if a == 0:
-        return (b, 0, 1)
-    else:
-        g, x1, y1 = extended_gcd(b % a, a)
-        return (g, y1 - (b // a) * x1, x1)
-
-g, x, y = extended_gcd(e, gamma)
-
-# Recover m
-m = (pow(ct1, x, N) * pow(m_to_gamma, y, N)) % N
-print(long_to_bytes(m))
+    Raise ct1 to (α + 1)
