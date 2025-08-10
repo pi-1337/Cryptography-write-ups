@@ -1,6 +1,6 @@
-# RSA Challenge Writeup — Exploiting \( m^{p+q} \) Leak
+# 🔓 RSA Challenge Writeup — Exploiting \( m^{p+q} \) Leak
 
-> *A fun RSA challenge where factoring is impossible but math saves the day.*
+> A fun RSA challenge where factoring is impossible… but math saves the day. 🧠⚡
 
 ---
 
@@ -8,38 +8,39 @@
 
 We are given:
 
-- Public key: \((e, N)\)
-- Ciphertext:
+- **Public key:** \((e, N)\)  
+- **Ciphertext:**  
   \[
   \text{ct}_1 = m^e \bmod N
-  \]
-- A **mysterious leak**:
+  \]  
+- **A mysterious leak:**  
   \[
   \text{ct}_2 = m^{p+q} \bmod N
   \]
 
 Here:
 
-- \(p\) and \(q\) are *huge* primes — **factoring \(N\)** is not feasible.
-- Our goal: **Recover \(m\) (the flag)** without factoring.
+- \(p\) and \(q\) are huge primes — factoring \(N\) is not feasible.
+- **Goal:** Recover \(m\) (the flag) without factoring.
 
 ---
 
 ## 🧠 Initial Thoughts
 
-Normally, an RSA solve path is:
+The *usual* RSA solve path:
 
-1. Factor \(N = p \cdot q\)
-2. Compute \(\varphi(N) = (p-1)(q-1)\)
-3. Get \(d = e^{-1} \bmod \varphi(N)\)
-4. Compute \(m = \text{ct}_1^d \bmod N\)
+1. Factor \( N = p \cdot q \)  
+2. Compute \(\varphi(N) = (p-1)(q-1)\)  
+3. Find \(d = e^{-1} \bmod \varphi(N)\)  
+4. Compute \( m = \text{ct}_1^d \bmod N \)  
 
-But here, factoring is off the table.  
+But here, **factoring is off the table**.
+
 Instead, we’re given:
 \[
 \text{ct}_2 = m^{p+q} \bmod N
 \]
-which is **unusual**.
+which is unusual — it’s basically a power related to \(p+q\).
 
 ---
 
@@ -48,49 +49,50 @@ which is **unusual**.
 We know:
 \[
 \varphi(N) = (p-1)(q-1) = pq - p - q + 1
-\]
+\]  
 Replacing \(pq\) with \(N\):
 \[
 \varphi(N) = N + 1 - (p+q)
 \]
 
-Euler's theorem says:
+From **Euler's theorem**:
 \[
 a^{\varphi(N)} \equiv 1 \pmod N
 \]
-
-Special case: if \(N\) is prime, \(\varphi(N) = N - 1\) (Fermat's Little Theorem).
-
-From Euler’s theorem:
+and thus:
 \[
 a^{\varphi(N) + 1} \equiv a \pmod N
 \]
-So, **if we could raise \(m\) to \(\varphi(N) + 1\)**, we’d get \(m\) back.
+
+So if we could compute \(m^{\varphi(N) + 1}\), we’d directly get \(m\).
 
 ---
 
 ## 🔍 Relating to the Leak
 
 We have:
-- \(\text{ct}_1 = m^e \bmod N\)
-- \(\text{ct}_2 = m^{p+q} \bmod N\)
-
-And:
+\[
+\text{ct}_1 = m^e \bmod N
+\]
+\[
+\text{ct}_2 = m^{p+q} \bmod N
+\]
+and:
 \[
 \varphi(N) = N + 1 - (p+q)
 \]
 
-If we somehow got \(m^{N+1} \bmod N\),  
-we could multiply it by \(m^{-(p+q)}\) (the inverse of \(\text{ct}_2\)) to get:
+If we somehow had \(m^{N+1} \bmod N\),  
+we could multiply by \(m^{-(p+q)}\) (inverse of \(\text{ct}_2\)) to get:
 \[
 m^{\varphi(N) + 1} \equiv m \pmod N
 \]
 
-Problem: We don’t know \(m^{N+1} \bmod N\) directly.
+Problem: We don’t have \(m^{N+1}\) directly.
 
 ---
 
-## ⚡ Trick: Approximating \(m^{N+1}\)
+## ⚡ Trick — Approximating \(m^{N+1}\)
 
 Let:
 \[
@@ -121,7 +123,7 @@ Substitute \(e = \gamma + \beta + 1\) and \(N = \alpha e + \beta\):
 \[
 m_{\gamma} = m^{\varphi(N) + \gamma} \equiv m^\gamma \pmod N
 \]
-(Because \(m^{\varphi(N)} \equiv 1 \pmod N\))
+(because \(m^{\varphi(N)} \equiv 1 \pmod N\))
 
 ---
 
@@ -137,12 +139,12 @@ m_{\gamma} = m^\gamma \bmod N
 
 ## 📏 Recovering \(m\) — Bézout's Lemma
 
-Bézout's Lemma says:
+Bézout’s Lemma:
 \[
 \exists \ x, y \ \text{s.t.} \ e x + \gamma y = \gcd(e, \gamma)
 \]
 
-Since \(e\) is prime and \(\gamma < e\), we have:
+Since \(e\) is prime and \(\gamma < e\):
 \[
 \gcd(e, \gamma) = 1
 \]
@@ -151,9 +153,9 @@ Thus:
 \[
 m = \left( \text{ct}_1^x \cdot m_{\gamma}^y \right) \bmod N
 \]
-Because:
+because:
 \[
-(\text{ct}_1^x \cdot m_{\gamma}^y) \bmod N
+\left(\text{ct}_1^x \cdot m_{\gamma}^y\right) \bmod N
 = m^{ex + \gamma y} \bmod N
 = m^1 \bmod N
 \]
