@@ -8,7 +8,6 @@ A fun RSA challenge where factoring is impossible but **math saves the day**.
 
 We are given:
 
-```math
 - **Public key:** \((e, N)\)  
 - **Ciphertext of flag:** \( \text{ct}_1 = m^e \bmod N \)  
 - **A mysterious leak:** \( \text{ct}_2 = m^{p+q} \bmod N \)  
@@ -141,10 +140,12 @@ m = ( \text{ct}_1^x \cdot m_\gamma^y ) \bmod N
 
 Because:
 
+```math
 \[
 ( m^{e} )^x \cdot ( m^\gamma )^y = m^{ex + \gamma y} = m^1
 \]
 
+```
 ---
 
 ## 💻 Final Exploit Code
