@@ -1,11 +1,148 @@
-Euler's totient function:
+# 🔐 RSA Challenge Writeup
 
-$$
-\phi(N) = (p-1)(q-1) = N + 1 - (p + q)
-$$
+## 🎯 The Challenge
 
-Euler's theorem:
+This is a fun RSA challenge with an interesting twist! Instead of factoring the modulus \( N \), we recover the message directly using a clever insight.
 
-$$
-a^{\phi(N)} \equiv 1 \pmod{N}
-$$
+### Given:
+
+- Public key \((e, N)\)
+- Ciphertext:  
+  \[
+  ct_1 = m^e \bmod N
+  \]
+- Additional leak:  
+  \[
+  ct_2 = m^{p+q} \bmod N
+  \]
+
+> **Note:** Primes \( p, q \) are huge, so factoring \( N \) is infeasible, but the leak opens a new attack vector.
+
+---
+
+## 💡 The Solution Approach
+
+### Euler's Totient:
+
+\[
+\phi(N) = (p-1)(q-1) = pq - p - q + 1 = N + 1 - (p + q)
+\]
+
+### Euler's theorem:
+
+\[
+a^{\phi(N)} \equiv 1 \pmod{N} \implies a^{\phi(N) + 1} \equiv a \pmod{N}
+\]
+
+### The trick:
+
+Express \( N \) as
+
+\[
+N = \alpha e + \beta, \quad \text{with } \beta < e
+\]
+
+Define
+
+\[
+\gamma = e - \beta - 1
+\]
+
+so
+
+\[
+e = \gamma + \beta + 1
+\]
+
+### Key calculation:
+
+\[
+\begin{aligned}
+m_{\to \gamma} &= ct_1^{\alpha + 1} \cdot ct_2^{-1} \bmod N \\
+&= m^{e(\alpha + 1)} \cdot m^{-(p+q)} \bmod N \\
+&= m^{e\alpha + e - (p+q)} \bmod N \\
+&= m^{N + \gamma + 1 - (p+q)} \bmod N \\
+&= m^{\phi(N) + \gamma} \bmod N \\
+&= m^{\phi(N)} \cdot m^{\gamma} \bmod N \\
+&= 1 \cdot m^{\gamma} \bmod N \\
+&= m^{\gamma} \bmod N
+\end{aligned}
+\]
+
+---
+
+### Recovering \( m \) with Bézout’s lemma:
+
+Since
+
+\[
+\gcd(e, \gamma) = 1
+\]
+
+there exist integers \( x, y \) with
+
+\[
+e x + \gamma y = 1
+\]
+
+Thus
+
+\[
+m = (ct_1^x \cdot m_{\to \gamma}^y) \bmod N
+\]
+
+because
+
+\[
+\begin{aligned}
+(ct_1^x \cdot m_{\to \gamma}^y) \bmod N &= (m^{e x} \cdot m^{\gamma y}) \bmod N \\
+&= m^{e x + \gamma y} \bmod N \\
+&= m^1 \bmod N \\
+&= m \bmod N
+\end{aligned}
+\]
+
+---
+
+## 🖥️ Implementation
+
+```python
+from Crypto.Util.number import long_to_bytes
+
+# Given
+e = 65537
+N = 13172635138210286640933237746072073728198869440440273861514688422430115450596963502627269613634657978751692320585777768877613321668778514462972611542147278205792418292362109100597755668571861738781190210255903465162483813897653948305531342676537057130369323555420200545974179860718822410192595079238246216026529376260568656408216009127973127738250617629330070723654601189310430802429585919291621479622419163092371272056180409609142738265178224163465585013019636286435078812898907472859171136422659050412212315590509027225331104292443193693974638004592849794819591007103879538185323581422819852185166422985403024630123
+
+ct1 = 8499526321488266762028127474977263983474334713646962923180757984708039537289636737028409522654349845032612940144246996001396064450188534247830979105036627472087587636695469693411422088223080856169980341928057477564688506588678465277896123712776169270866525885072607021419929184184301722442524104467963680432737243478200661224741027413690099507128782156810842444314483076587935222998920241102484844741597333281611874849648935849985954902264102662618041817365284648356127737145896858259709819593359264714426125676691235985164360773645489923563993927995838346085066937602961724919392025887999986486672200850129835569774
+
+ct2 = 2263178005282615069738169250508811825030372342139636879043114251227029802177975391784856426659871916802959302578620910469427367218786299839311310420522660987052055310279591316813828952756984548230575321772825193775083404279028090110850848262192595930920326368607665856808251531130234210906413358662814500632504899088517752958423466186872534450108628371006268110210630017230741670440780982809417986017372337888735465439382827207990030719121834402226087906249993820193417658352914727984318783025375497623944699995700474418221251293446038111913247755996471673024017921092527032486774115935601292346440934530921157935322
+
+# Compute alpha, beta, gamma
+alpha = N // e
+beta = N % e
+gamma = e - beta - 1
+
+print(f"alpha = {alpha}")
+print(f"beta = {beta}")
+print(f"gamma = {gamma}")
+
+# Calculate m^gamma
+m_to_gamma = (pow(ct1, alpha + 1, N) * pow(ct2, -1, N)) % N
+
+def extended_gcd(a, b):
+    """
+    Returns (gcd, x, y) such that:
+       a * x + b * y = gcd(a, b)
+    """
+    if a == 0:
+        return (b, 0, 1)
+    gcd, x1, y1 = extended_gcd(b % a, a)
+    x = y1 - (b // a) * x1
+    y = x1
+    return (gcd, x, y)
+
+gcd, x, y = extended_gcd(e, gamma)
+
+flag = (pow(ct1, x, N) * pow(m_to_gamma, y, N)) % N
+
+print("Recovered flag:", long_to_bytes(flag))
