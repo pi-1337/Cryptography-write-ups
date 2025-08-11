@@ -16,6 +16,13 @@ $$
 ct_2 = m^{p+q} \bmod N
 $$
 
+$$
+\ct_2 = m^{p+q} \bmod N
+$$
+$$
+\phi(N) = (p-1)(q-1) = pq - p - q + 1 = N + 1 - (p + q)
+$$
+
 > **Note:** Primes \(p, q\) are huge, so factoring \(N\) is infeasible, but the leak opens a new attack vector.
 
 ---
