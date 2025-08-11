@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSA Challenge Writeup</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\$$', '\$$']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            }
+        };
+    </script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin: 20px 0;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 15px;
+        }
+        
+        h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+        }
+        
+        h3 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+        
+        .problem-section {
+            background: #f8f9fa;
+            border-left: 4px solid #e74c3c;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .solution-section {
+            background: #f8f9fa;
+            border-left: 4px solid #27ae60;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        
+        .math-block {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .key-insight {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 5px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        pre {
+            background: #2d3748;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        code {
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+        
+        .step {
+            counter-increment: step-counter;
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #6c757d;
+        }
+        
+        .step::before {
+            content: "Step " counter(step-counter) ": ";
+            font-weight: bold;
+            color: #495057;
+        }
+        
+        .steps {
+            counter-reset: step-counter;
+        }
+        
+        ul, ol {
+            padding-left: 25px;
+        }
+        
+        li {
+            margin: 8px 0;
+        }
+        
+        .formula {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 RSA Challenge Writeup</h1>
+        
+        <div class="problem-section">
+            <h2>🎯 The Challenge</h2>
+            <p>This is a fun RSA challenge with an interesting twist! Instead of the typical approach of factoring the modulus N, we need to recover the message directly using a clever mathematical insight.</p>
+            
+            <h3>What we are given:</h3>
+            <ul>
+                <li>Public key $(e, N)$</li>
+                <li>Ciphertext of the flag: $ct_1 = m^e \bmod N$</li>
+                <li><strong>The interesting part:</strong> $ct_2 = m^{p+q} \bmod N$</li>
+            </ul>
+            
+            <div class="highlight">
+                <strong>Key Observation:</strong> The primes $p, q$ are super large, so we can't just factor $N$. But the leak $ct_2 = m^{p+q} \bmod N$ gives us a different attack vector!
+            </div>
+        </div>
+
+        <div class="solution-section">
+            <h2>💡 The Solution Approach</h2>
+            
+            <p>Instead of trying to factor $N$, my approach was to recover the message directly using the leaked information.</p>
+
+            <div class="steps">
+                <div class="step">
+                    <h3>Understanding Euler's Totient Function</h3>
+                    <p>The key insight starts with Euler's totient function $\phi(N)$:</p>
+                    
+                    <div class="math-block">
+                        $$\phi(N) = (p-1) \cdot (q-1)$$
+                        $$= pq - p - q + 1$$
+                        $$= N + 1 - (p+q)$$
+                    </div>
+                    
+                    <div class="key-insight">
+                        <strong>What is $\phi(N)$?</strong> It's called the Euler quotient of $N$, equal to the product of its prime factors minus 1.
+                        <br><br>
+                        For prime factors $p_1, p_2, \ldots, p_n$ of $N$:
+                        $$\phi(N) = \prod_{i=1}^{n} (p_i - 1)$$
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h3>Euler's Theorem</h3>
+                    <p>We know from Euler's theorem that:</p>
+                    <div class="formula">
+                        $$a^{\phi(N)} \equiv 1 \pmod{N}$$
+                    </div>
+                    
+                    <p>This means:</p>
+                    <div class="formula">
+                        $$a^{\phi(N) + 1} \equiv a \pmod{N}$$
+                    </div>
+                    
+                    <div class="highlight">
+                        <strong>Insight:</strong> If we could raise the plaintext (flag) to $\phi(N) + 1$, we get back the flag!
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h3>The Mathematical Trick</h3>
+                    <p>Since $\phi(N) = N + 1 - (p+q)$ and we have $m^{p+q} \bmod N$, we can work backwards.</p>
+                    
+                    <p>We need to find a way to compute $m^{\phi(N)+1} \bmod N$ without directly knowing $m$.</p>
+                    
+                    <p>Let's express $N$ in terms of $e$:</p>
+                    <div class="math-block">
+                        $$N = \alpha \cdot e + \beta \text{ where } \beta < e$$
+                        $$\text{Define } \gamma = e - \beta - 1$$
+                        $$\text{Thus: } e = \gamma + \beta + 1$$
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h3>The Key Calculation</h3>
+                    <p>If we raise $ct_1$ to $\alpha + 1$ and multiply by the inverse of $ct_2$:</p>
+                    
+                    <div class="math-block">
+                        $$m_{to\_\gamma} = ct_1^{\alpha + 1} \cdot ct_2^{-1} \bmod N$$
+                        $$= m^{e(\alpha + 1)} \cdot m^{-(p+q)} \bmod N$$
+                        $$= m^{e\alpha + e - (p+q)} \bmod N$$
+                        $$= m^{e\alpha + \gamma + \beta + 1 - (p+q)} \bmod N$$
+                        $$= m^{N + \gamma + 1 - (p+q)} \bmod N$$
+                        $$= m^{\phi(N) + \gamma} \bmod N$$
+                        $$= m^{\phi(N)} \cdot m^{\gamma} \bmod N$$
+                        $$= 1 \cdot m^{\gamma} \bmod N$$
+                        $$= m^{\gamma} \bmod N$$
+                    </div>
+                </div>
+
+                <div class="step">
+                    <h3>Recovering the Message with Bézout's Lemma</h3>
+                    <p>Now we have:</p>
+                    <ul>
+                        <li>$ct_1 = m^e \bmod N$</li>
+                        <li>$m_{to\_\gamma} = m^{\gamma} \bmod N$</li>
+                    </ul>
+                    
+                    <div class="key-insight">
+                        <strong>Bézout's Lemma:</strong> For given integers $a, b$, there exist unique integers $x, y$ such that:
+                        $$ax + by = \gcd(a, b)$$
+                        These can be found using the Extended Euclidean Algorithm.
+                    </div>
+                    
+                    <p>Since $\gamma < e$ and $e$ is prime, we have $\gcd(e, \gamma) = 1$.</p>
+                    
+                    <p>We find $x, y$ such that $ex + \gamma y = 1$, then:</p>
+                    <div class="formula">
+                        $$m = (ct_1^x \cdot m_{to\_\gamma}^y) \bmod N$$
+                    </div>
+                    
+                    <p><strong>Why does this work?</strong></p>
+                    <div class="math-block">
+                        $$(ct_1^x \cdot m_{to\_\gamma}^y) \bmod N = (m^{ex} \cdot m^{\gamma y}) \bmod N$$
+                        $$= m^{ex + \gamma y} \bmod N$$
+                        $$= m^1 \bmod N = m \bmod N$$
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>🖥️ Implementation</h2>
+        <pre><code class="language-python">from Crypto.Util.number import *
+
+# Given values
+e = 65537
+N = 13172635138210286640933237746072073728198869440440273861514688422430115450596963502627269613634657978751692320585777768877613321668778514462972611542147278205792418292362109100597755668571861738781190210255903465162483813897653948305531342676537057130369323555420200545974179860718822410192595079238246216026529376260568656408216009127973127738250617629330070723654601189310430802429585919291621479622419163092371272056180409609142738265178224163465585013019636286435078812898907472859171136422659050412212315590509027225331104292443193693974638004592849794819591007103879538185323581422819852185166422985403024630123
+
+ct1 = 8499526321488266762028127474977263983474334713646962923180757984708039537289636737028409522654349845032612940144246996001396064450188534247830979105036627472087587636695469693411422088223080856169980341928057477564688506588678465277896123712776169270866525885072607021419929184184301722442524104467963680432737243478200661224741027413690099507128782156810842444314483076587935222998920241102484844741597333281611874849648935849985954902264102662618041817365284648356127737145896858259709819593359264714426125676691235985164360773645489923563993927995838346085066937602961724919392025887999986486672200850129835569774
+
+ct2 = 2263178005282615069738169250508811825030372342139636879043114251227029802177975391784856426659871916802959302578620910469427367218786299839311310420522660987052055310279591316813828952756984548230575321772825193775083404279028090110850848262192595930920326368607665856808251531130234210906413358662814500632504899088517752958423466186872534450108628371006268110210630017230741670440780982809417986017372337888735465439382827207990030719121834402226087906249993820193417658352914727984318783025375497623944699995700474418221251293446038111913247755996471673024017921092527032486774115935601292346440934530921157935322
+
+# Calculate alpha, beta, gamma
+alpha = N // e
+beta = N % e
+gamma = e - beta - 1
+
+print(f"{alpha = }")
+print(f"{beta = }")
+print(f"{gamma = }")
+
+# Calculate m^gamma
+m_to_gamma = (pow(ct1, alpha + 1, N) * pow(ct2, -1, N)) % N
+
+def extended_gcd(a, b):
+    """
+    Returns (gcd, x, y) such that:
+       a * x + b * y = gcd(a, b)
+    """
+    if a == 0:
+        return (b, 0, 1)
+    else:
+        gcd, x1, y1 = extended_gcd(b % a, a)
+        x = y1 - (b // a) * x1
+        y = x1
+        return (gcd, x, y)
+
+# Use Extended Euclidean Algorithm
+gcd, x, y = extended_gcd(e, gamma)
+
+# Recover the flag
+flag_to_gcd = (pow(ct1, x, N) * pow(m_to_gamma, y, N)) % N
+
+print("Here is the flag to the power of", gcd, ":", long_to_bytes(flag_to_gcd))
+</code></pre>
+
+        <div class="highlight">
+            <h3>🎉 Result</h3>
+            <p>This approach successfully recovers the original plaintext message (the flag) without needing to factor the large modulus N!</p>
+            
+            <p><strong>Key Takeaway:</strong> Sometimes in cryptography challenges, the most elegant solution doesn't follow the "standard" approach. The additional leak $ct_2 = m^{p+q} \bmod N$ opened up a completely different attack vector using properties of Euler's totient function and the Extended Euclidean Algorithm.</p>
+        </div>
+    </div>
+</body>
+</html>
