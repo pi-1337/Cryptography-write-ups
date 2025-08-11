@@ -15,10 +15,6 @@ But more importantly they gave us something more interesting, which is ct2 = m^(
 Solve:
 In general RSA chals, the task is to factorthe modulus N SOMEHOW, then continue the process of decrypting the msg
 
-but in this chal specisifically, i dont there is a solve using the general approach, my approch was to 
-basically try to recover the msg directly
-
-
 Here is my approch:
 
 because the insecure thing in this chal was leaking m^(p+q) mod N
@@ -30,14 +26,14 @@ the first thing i thought of was that φ(N) can be written as
 
 
 what even is φ(N) ? 
-well, its called the euler quotion of N, and it is the equal to the product of it primes minus - 1:
+well, its called the euler quotion of N, and it is the equal to the product of it prime factors minus - 1:
 
 example :
 let p1, p2, ..., pn be the prime factors of N
 
-the euler quotion can be written as φ(N) = pigma(pi - 1) i: 1 ---> n
+the euler quotion can be written as φ(N) = product(pi - 1) for i: 1 ---> n
 
-and we know in math property that in general a^φ(N) = 1 mod N
+and we know in math a property called euler that in general a^φ(N) = 1 mod N
 you can see that Fermat's little theorm is a special case of this property when N is prime:
 if N is prime then it is the only prime factor of itself therefore φ(N) = N-1
 
@@ -63,7 +59,7 @@ its because we dont have m that we cant do this
 
 the path is correct but we need another approch, in fact we dont need m^(N+1) mod N we can just approximate it, but how ?
 
-since they give us ct1 = m^e mod N and e, N are public information, its easy
+since they gave us ct1 = m^e mod N and e, N are public information, its easy
 we can just raise the ct1 by the N/e and we gonna get what we want, let me explain in math:
 
 we have N = α * e + β with β < e and we define γ = e - β - 1, we gonna need this later
@@ -86,7 +82,7 @@ if we raise the ct1 to α + 1 we get:
 there you go now you know why i called it "m_to_γ"
 
 but so what now that we have m_to_γ
-well if you have m to a number and m to another number that are independent of each other meaning (one is not a multiple of the other) then we can recover m, how ?
+well if you have m to a number, and m to another number, and the numbers are independent of each other meaning (one is not a multiple of the other) then we can recover m, how ?
 
 well the magic is called the Bézout's Lemma, and it says that:
     there exist two uniq x and y such that ax + by = gcd(a, b) for a given a, b
@@ -98,7 +94,7 @@ well because we have:
     {ct1 = m^e mod N
     {m_to_γ = m^γ mod N
 
-this means we can recover m to the power of gcd(e, γ), and we are luck because γ < e and e is prime so this means gcd(γ, e) thus we get m exactly.
+this means we can recover m to the power of gcd(e, γ), and we are lucky because γ < e and e is prime so this means gcd(γ, e)=1 thus we get m exactly.
 
 "γ is gamma not y"
 
@@ -106,7 +102,7 @@ this is how it works, we calculate x, y such that ex + γy = gcd(e, γ) via the 
 then we use them like this:
     we calculate m = ((ct1 ^ x mod N) * (m_to_γ ^ y mod N)) mod N
 
-there you we just calculated is the original plaintext m its the flag, in the code its the msg
+there you have it, what we just calculated is the original plaintext m, the flag, in the code its the msg
 but how ?
 
 this is the math behind it:
