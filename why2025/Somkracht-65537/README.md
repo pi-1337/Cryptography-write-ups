@@ -6,12 +6,12 @@ This is a fun RSA challenge with an interesting twist! Instead of factoring the 
 
 ### Given:
 
-- Public key \((e, N)\)
-- Ciphertext:
+
+\((e, N)\)
   $$
   ct_1 = m^e \bmod N
   $$
-- Additional leak:
+
   $$
   ct_2 = m^{p+q} \bmod N
   $$
