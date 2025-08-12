@@ -6,16 +6,16 @@ This is a fun RSA challenge with an interesting twist! Instead of factoring the 
 
 ### Given:
 
-## Public Key:
+#### Public Key:
 $$
 \((e, N)\)
 $$
-## Ciphertext (encrypted in regular RSA):
+#### Ciphertext (encrypted in regular RSA):
 $$
 ct_1 = m^e \bmod N
 $$
 
-## Additionnal leak (this is unusual in secure RSA):
+#### Additionnal leak (this is unusual in secure RSA):
 $$
 ct_2 = m^{p+q} \bmod N
 $$
