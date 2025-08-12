@@ -8,10 +8,12 @@ This is a fun RSA challenge with an interesting twist! Instead of factoring the 
 
 
 \((e, N)\)
+### Euler's theorem:
 $$
 ct_1 = m^e \bmod N
 $$
 
+### Euler's theorem:
 $$
 ct_2 = m^{p+q} \bmod N
 $$
