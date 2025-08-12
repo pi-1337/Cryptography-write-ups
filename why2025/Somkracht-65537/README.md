@@ -8,13 +8,13 @@ This is a fun RSA challenge with an interesting twist! Instead of factoring the 
 
 
 \((e, N)\)
-  $$
-  ct_1 = m^e \bmod N
-  $$
+$$
+ct_1 = m^e \bmod N
+$$
 
-  $$
-  ct_2 = m^{p+q} \bmod N
-  $$
+$$
+ct_2 = m^{p+q} \bmod N
+$$
 
 > **Note:** Primes \(p, q\) are huge, so factoring \(N\) is infeasible, but the leak opens a new attack vector.
 
