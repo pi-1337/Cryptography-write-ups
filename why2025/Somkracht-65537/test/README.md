@@ -84,8 +84,8 @@ $$
 $$
 \begin{aligned}
 m_{\to \gamma} &= ct_1^{\alpha + 1} \cdot ct_2^{-1} \bmod N \\
-&= m^{e(\alpha + 1)} \cdot m^{-(p+q)} \bmod N \\
-&= m^{e\alpha + e - (p+q)} \bmod N \\
+m^{e(\alpha + 1)} \cdot m^{-(p+q)} \bmod N \\
+m^{e\alpha + e - (p+q)} \bmod N \\
 &= m^{N + \gamma + 1 - (p+q)} \bmod N \\
 &= m^{\phi(N) + \gamma} \bmod N \\
 &= m^{\phi(N)} \cdot m^{\gamma} \bmod N \\
