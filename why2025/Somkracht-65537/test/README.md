@@ -73,8 +73,10 @@ Becomes the HNP equation. we just need enough samples of $(z, e)$, it turns out 
 Doing this only gets the witness mod q, also note that we can do this over and over by closing the connection and restarting it, and of course with different primes. Thus allowing as to recover the full witness using *Chinese Reminder Theorem* (CRT) which states that given :
 $$
 \begin{aligned}
+&= m^{\gamma} \bmod N
 a_1 \pmod{m_1} \\
 a_2 \pmod{m_2} \\
+&= m^{\gamma} \bmod N
 \end{aligned}
 $$
 
