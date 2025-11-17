@@ -72,17 +72,7 @@ Becomes the HNP equation. we just need enough samples of $(z, e)$, it turns out 
 
 Doing this only gets the witness mod q, also note that we can do this over and over by closing the connection and restarting it, and of course with different primes. Thus allowing as to recover the full witness using *Chinese Reminder Theorem* (CRT) which states that given equations :
 
-$$
-x \equiv
-\big\{
-\begin{aligned}
-& a_1 \pmod{m_1} \\
-& a_2 \pmod{m_2} \\
-& \vdots \\
-& a_k \pmod{m_k}
-\end{aligned}
-\big.
-$$
+
 
 
 One can recover $x$ Uniquely using CRT which is already implemented in sagemath, so the final script is this, its an extension of this script https://github.com/josephsurin/lattice-based-cryptanalysis/blob/main/examples/problems/hidden_number_problem.sage :
