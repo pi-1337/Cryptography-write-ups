@@ -70,7 +70,7 @@ Becomes the HNP equation. we just need enough samples of $(z, e)$, it turns out 
 
 # CRT :
 
-Doing this only gets the witness mod q, also note that we can do this over and over by closing the connection and restarting it, and of course with different primes. Thus allowing as to recover the full witness using *Chinese Reminder Theorem* (CRT) which states that given equations :
+Doing this only gets the witness mod q, also note that we can do this over and over by closing the connection and restarting it, and of course with different primes. Thus allowing as to recover the full witness using *Chinese Remainder Theorem* (CRT) which states that given equations :
 
 $$
 \begin{cases}
