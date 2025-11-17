@@ -65,9 +65,7 @@ The straight-forward attack vector is to recover $r$ from $a$ and use it to reco
 
 The key here is that the random generated number $r$ is bounded by $(1 << 200)$ or $2^{200}$ while the modulus q is much larger (256 bits), this tells us that we can treat the number $r$ as the error term in the *Hidden Number Problem* (HNP) equation, and with enough equation we may be able to recover the secret which is the *witness* using  *Lattice Reduction Technique* . So:
 
-$$
-z = (r + w \cdot e) \bmod q
-$$
+$$z = (r + w \cdot e) \bmod q$$
 Becomes the HNP equation. we just need enough samples of $(z, e)$, it turns out 6 samples are enough. enough to recover the $w \bmod q$.
 
 # CRT :
