@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zero-Knowledge Challenge Write-up</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background-color: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 1.8em;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #0056b3;
+        }
+        
+        p {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+        
+        code {
+            background-color: #f4f4f4;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+        
+        pre {
+            background-color: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin: 20px 0;
+            line-height: 1.4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        
+        pre code {
+            color: inherit;
+            padding: 0;
+            background: none;
+        }
+        
+        .math-block {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background-color: #f0f8ff;
+            border-left: 4px solid #007bff;
+        }
+        
+        .case-block {
+            background-color: #f0f8ff;
+            padding: 20px;
+            border-left: 4px solid #007bff;
+            margin: 20px 0;
+            border-radius: 3px;
+        }
+        
+        ul {
+            margin-left: 20px;
+            margin-bottom: 15px;
+        }
+        
+        li {
+            margin-bottom: 8px;
+        }
+        
+        a {
+            color: #007bff;
+            text-decoration: none;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Zero-Knowledge Challenge Write-up</h1>
+        
+        <p>The challenge is a Zero Knowledge Scheme, where the server tries to prove to the player their knowledge of a witness <span class="math">$$w$$</span> (which is the flag), without revealing the <em>witness</em>.</p>
+        
+        <h2>The Script:</h2>
+        
+        <pre><code class="language-python">FLAG  = os.getenv("FLAG", "Lorem ipsum dolor sit amet consectetur adipiscing elit. Pretium tellus duis convallis tempus leo eu aenean. Iaculis massa nisl malesuada lacinia integer nunc posuere. Conubia nostra inceptos himenaeos orci varius natoque penatibus. Nulla molestie mattis scelerisque maximus eget fermentum odio. Blandit quis suspendisse aliquet nisi sodales consequat magna. Ligula congue sollicitudin erat viverra ac tincidunt nam. Velit aliquam imperdiet mollis nullam volutpat porttitor ullamcorper. Dui felis venenatis ultrices proin libero feugiat tristique. Cubilia curae hac habitasse platea dictumst lorem ipsum. Sem placerat in id cursus mi pretium tellus. Fringilla lacus nec metus bibendum egestas iaculis massa. Taciti sociosqu ad litora torquent per conubia nostra. Ridiculus mus donec rhoncus eros lobortis nulla molestie. Mauris pharetra vestibulum fusce dictum risus blandit quis. Finibus facilisis dapibus etiam interdum tortor ligula congue. Justo lectus commodo augue arcu dignissim velit aliquam. Primis vulputate ornare sagittis vehicula praesent dui felis. Senectus netus suscipit auctor curabitur facilisi cubilia curae. Quisque faucibus ex sapien vitae pellentesque sem placerat. flag{dGhpbmtfeW91J3JlX3NtYXJ0X2h1aD8=}").encode()
+
+
+class ZKP:
+    def __init__(self):
+        self.p = getPrime(256)
+        self.q = getPrime(256) 
+        self.g = 2
+        self.w = b2l(FLAG) 
+        self.y = pow(self.g, self.w, self.p)
+    def prover(self):
+            r = randbelow(1 &lt;&lt; 200)
+            a = pow(self.g, r, self.p)
+            e = randbelow(1 &lt;&lt; 256)
+            z = (r + self.w * e) % self.q
+            proof = {"a": a, "e": e, "z": z}
+            return proof
+    def __str__(self):
+        return f"ZKP PUBLIC PARAMETERS:\np = {self.p}\nq = {self.q}\ng = {self.g}\ny = {self.y}"
+
+user = ZKP()
+
+menu = """
+[1] Prover
+[2] Exit
+"""
+def main():
+    ctr = 0
+    print(user)
+    print(f'hint: {b2l(FLAG).bit_length()}...you\'re welcome :)')
+
+    while True:
+        print(menu)
+        choice = input("Select an option &gt; ")
+        if choice == '1':
+            if ctr &gt;= 6:
+                print("You have reached the maximum number of proofs.")
+                continue
+            
+            print("Prover selected.")
+            print(f'Here is your proof: {user.prover()}')
+            ctr += 1
+
+        elif choice == '2':
+            print("Goodbye!")
+            break
+        else:
+            print("Invalid option. Please try again.")
+
+if __name__ == "__main__":
+    main()</code></pre>
+        
+        <p>This is a Zero-knowledge Scheme, the <span class="math">$$\text{witness}$$</span> is <span class="math">$$w$$</span> and proof is consisted of <span class="math">$$(a, e, z)$$</span>, where a <span class="math">$$a$$</span> is the <em>commitment</em>, <span class="math">$$e$$</span> is the <em>challenge</em> and <span class="math">$$z$$</span> is the <em>response</em> of the prover.</p>
+        
+        <p>The straight-forward attack vector is to recover <span class="math">$$r$$</span> from <span class="math">$$a$$</span> and use it to recover the <em>witness</em>. But since recover <span class="math">$$r$$</span> from <span class="math">$$a$$</span> is an instance of the DLP in <span class="math">$$\mathbb{F}_p$$</span> <em>(Discrete Logarithm problem on a finite field)</em>, and DLP is considered a hard problem, then this approach is not feasible.</p>
+        
+        <h2>LLL :</h2>
+        
+        <p>The key here is that the random generated number <span class="math">$$r$$</span> is bounded by <span class="math">$$(1 \ll 200)$$</span> or <span class="math">$$2^{200}$$</span> while the modulus q is much larger (256 bits), this tells us that we can treat the number <span class="math">$$r$$</span> as the error term in the <em>Hidden Number Problem</em> (HNP) equation, and with enough equation we may be able to recover the secret which is the <em>witness</em> using <em>Lattice Reduction Technique</em>. So:</p>
+        
+        <div class="math-block">
+            $$z = (r + w \cdot e) \bmod q$$
+        </div>
+        
+        <p>Becomes the HNP equation. we just need enough samples of <span class="math">$$(z, e)$$</span>, it turns out 6 samples are enough to recover the <span class="math">$$w \bmod q$$</span>.</p>
+        
+        <h2>CRT :</h2>
+        
+        <p>Doing this only gets the witness mod q, also note that we can do this over and over by closing the connection and restarting it, and of course with different primes. Thus allowing us to recover the full witness using <em>Chinese Remainder Theorem</em> (CRT) which states that given equations :</p>
+        
+        <div class="case-block">
+            $$
+            \begin{cases}
+            x \equiv a_1 \pmod{m_1} \\
+            x \equiv a_2 \pmod{m_2} \\
+            \vdots \\
+            x \equiv a_k \pmod{m_k}
+            \end{cases}
+            $$
+        </div>
+        
+        <p>One can recover <span class="math">$$x$$</span> uniquely using CRT which is already implemented in sagemath, so the final script is this, it's an extension of <a href="https://github.com/josephsurin/lattice-based-cryptanalysis/blob/main/examples/problems/hidden_number_problem.sage" target="_blank">this script</a> :</p>
+        
+        <pre><code class="language-python">from Crypto.Util.number import long_to_bytes
+
+data = [{}] # this is got from the data script below
+
+def hnp_example(q, proofs):
+    B = 1 &lt;&lt; 200
+    T = []
+    A = []
+    for d in proofs:
+        T.append(d["e"])
+        A.append(d["z"])
+    sol = hnp(q, T, A, B, verbose=True)
+    print("Recovered solution:", sol)
+    w_mod_q = sol % q
+    return w_mod_q, q
+
+reminders = []
+modulues = []
+
+for session in data:
+    wq, mod = hnp_example(session["q"], session["proofs"])
+    reminders.append(wq)
+    modulues.append(mod)
+
+W = crt(reminders, modulues)
+
+print("Recovered w bitlen:", int(W).bit_length())
+print("Recovered FLAG:")
+print(long_to_bytes(W))</code></pre>
+        
+        <p>I used this repo: <a href="https://github.com/josephsurin/lattice-based-cryptanalysis" target="_blank">https://github.com/josephsurin/lattice-based-cryptanalysis</a></p>
+        
+        <h2>DATA :</h2>
+        
+        <p>This is the script to get data from the server in python:</p>
+        
+        <pre><code class="language-python">from pwn import *
+import re
+import ast
+
+HOST = "4786170ad621653c.chal.ctf.ae"
+PORT = 443
+
+def collect_all():
+    sessions = []
+
+    for S in range(40):
+        print(f"[+] Starting session {S+1}/10")
+        s = remote(HOST, PORT, ssl=True, sni=HOST)
+
+        banner = s.recvuntil(b"[2] Exit").decode()
+
+        # ---------------------------
+        # Extract metadata
+        # ---------------------------
+        md = {}
+        md["p"] = int(re.search(r"p = (\d+)", banner).group(1))
+        md["q"] = int(re.search(r"q = (\d+)", banner).group(1))
+        md["g"] = int(re.search(r"g = (\d+)", banner).group(1))
+        md["y"] = int(re.search(r"y = (\d+)", banner).group(1))
+        md["bitlen"] = int(re.search(r"hint: (\d+)", banner).group(1))
+        md["proofs"] = []
+
+        # ---------------------------
+        # Get 6 proofs
+        # ---------------------------
+        for i in range(6):
+            s.sendline(b"1")
+            line = s.recvline_contains(b"proof").decode()
+
+            # Extract dict {"a":..., "e":..., "z":...}
+            proof_dict = ast.literal_eval(line.split("proof:")[1].strip())
+
+            md["proofs"].append({
+                "a": proof_dict["a"],
+                "e": proof_dict["e"],
+                "z": proof_dict["z"]
+            })
+
+        s.close()
+
+        sessions.append(md)
+
+    return sessions
+
+if __name__ == "__main__":
+    data = collect_all()
+
+    print("\n=== FIRST SESSION ===")
+    print(data)
+
+    print(f"\n[+] Total sessions collected: {len(data)}")
+    print("[+] Each session contains its own parameters + 6 proofs.")</code></pre>
+    </div>
+</body>
+</html>
