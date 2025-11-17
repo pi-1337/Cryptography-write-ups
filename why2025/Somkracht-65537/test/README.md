@@ -73,23 +73,14 @@ Becomes the HNP equation. we just need enough samples of $(z, e)$, it turns out 
 Doing this only gets the witness mod q, also note that we can do this over and over by closing the connection and restarting it, and of course with different primes. Thus allowing as to recover the full witness using *Chinese Reminder Theorem* (CRT) which states that given :
 $$
 \begin{aligned}
-x &\equiv a_1 \pmod{m_1} \\
-x &\equiv a_2 \pmod{m_2} \\
-&\;\;\vdots \\
-x &\equiv a_k \pmod{m_k}
+a_1 \pmod{m_1} \\
+a_2 \pmod{m_2} \\
 \end{aligned}
 $$
 
 ---
 $$
 \begin{aligned}
-m_{\to \gamma} &= ct_1^{\alpha + 1} \cdot ct_2^{-1} \bmod N \\
-m^{e(\alpha + 1)} \cdot m^{-(p+q)} \bmod N \\
-m^{e\alpha + e - (p+q)} \bmod N \\
-&= m^{N + \gamma + 1 - (p+q)} \bmod N \\
-&= m^{\phi(N) + \gamma} \bmod N \\
-&= m^{\phi(N)} \cdot m^{\gamma} \bmod N \\
-&= 1 \cdot m^{\gamma} \bmod N \\
 &= m^{\gamma} \bmod N
 \end{aligned}
 $$
