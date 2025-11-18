@@ -79,7 +79,6 @@ The first is that the server doesn't check for empty string, which we will take 
 And the second is that the server encrypt OUR message in RSA using the prime $p$, which is not secure at all, it is supposed to use $N$ as the modulus.
 
 ```python
-```python
 s=input("> ") # anything can go here (Vulnerability 1)
 m=s.encode()
 if bytes_to_long(m)>=rsa.p: 
