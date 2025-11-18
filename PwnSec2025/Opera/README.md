@@ -106,7 +106,7 @@ Now we just need to recover the LCG parameters $(a, c)$, and now recovering the 
 which is :
 
 $$
-Enc\_FLAG
+EncFLAG
  = Enc(FLAG) = FLAG^e \pmod{N}
 $$
 
