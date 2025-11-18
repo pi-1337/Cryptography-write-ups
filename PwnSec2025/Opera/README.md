@@ -107,9 +107,12 @@ which is :
 
 $$
 Enc\_FLAG
- = Enc(FLAG) = FLAG^e \pmod{N}$$
+ = Enc(FLAG) = FLAG^e \pmod{N}
+$$
+
 Now we need to break the RSA layer, and to do so, we need some math :
 We have the encrypted arbitrary text which I have chosen to be "A" so :
+
 $$
 \text{Let } A \text{ be the integer representing "A".} \\
 A = \mathrm{ord}("A") \\
@@ -128,7 +131,7 @@ $$
 a - b \equiv 0 \pmod{p} \iff\ p \mid (a-b)
 $$
 
-Since $p$ is divisor of both $(a-b)$ and $N$, we can factor $N using GCD, so $p = gcd(N, a-b)$.
+Since $p$ is divisor of both $(a-b)$ and $N$, we can factor $N$ using GCD, so $p = gcd(N, a-b)$.
 
 # The Script :
 
