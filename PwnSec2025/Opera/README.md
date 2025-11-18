@@ -77,6 +77,7 @@ The challenge is consisted of two layers of "pseudo-random generator LCG" and an
 
 The first is that the server doesn't check for empty string, which we will take advantage of.
 And the second is that the server encrypt OUR message in RSA using the prime $p$, which is not secure at all, it is supposed to use $N$ as the modulus.
+
 ```python
 ```python
 s=input("> ") # anything can go here (Vulnerability 1)
@@ -97,6 +98,7 @@ print(xor(C, lcg.stream(len(C))).hex())
 ### The math :
 
 If s is an empty string then m = 0, thus we get the stream itself :
+
 $$
 output = C \oplus stream = Enc(m) \oplus stream = 0 \oplus stream = stream
 $$
@@ -112,7 +114,6 @@ We have the encrypted arbitrary text which I have chosen to be "A" so :
 $$
 \text{Let } A \text{ be the integer representing "A".} \\
 A = \mathrm{ord}("A") \\
-
 $$
 
 $$
@@ -121,11 +122,11 @@ a \equiv A^e \pmod{p} \\
 b \equiv A^e \pmod{N}
 \end{aligned}
 $$
+
 This means:
+
 $$
-
 a - b \equiv 0 \pmod{p} \iff\ p \mid (a-b)
-
 $$
 
 Since $p$ is divisor of both $(a-b)$ and $N$, we can factor $N using GCD, so $p = gcd(N, a-b)$.
