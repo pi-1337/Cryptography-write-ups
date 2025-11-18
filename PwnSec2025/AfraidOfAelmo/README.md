@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
 This is a Zero-knowledge Scheme, the $witness$ is $w$ and proof is consisted of $(a, e, z)$, where a $a$ is the *commitment* , $e$ is the *challenge* and $z$ is the *response* of the prover.
 
-The straight-forward attack vector is to recover $r$ from $a$ and use it to recover the *witness*. But since recover $r$ from $a$ is an instance of the DLP in $\mathbb{F}_p$ *(Discrete Logarithm problem on a finite field)*, and DLP is considered a hard problem, then this approach is not feasible.
+The straight-forward attack vector is to recover $r$ from $a$ and use it to recover the *witness*. But since recovering $r$ from $a$ is an instance of the DLP in $\mathbb{F}_p$ *(Discrete Logarithm problem on a finite field)*, and DLP is considered a hard problem, then this approach is not feasible.
 
 # LLL :
 
